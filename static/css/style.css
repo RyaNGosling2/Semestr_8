@@ -1,0 +1,174 @@
+table {
+    width: 80%;
+    margin-left: 10%;
+}
+summary {
+    cursor: pointer;
+    margin-bottom: 5px;
+}
+input[type="range"]{
+    margin: 0;
+}
+form{
+    margin-bottom: 1px;
+}
+.mar{
+    margin-left: 5px;
+}
+#sourceImage {
+    display: none;
+}
+#canvas {
+    object-fit: contain;
+    align-self: center;
+}
+.con {
+    width: 83%;  
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.midlo{
+    display: flex; 
+    align-items: center;
+    margin-top: 5px;
+}
+.midlo2{
+    display: flex; 
+    align-items: center;
+    margin-top: 5px;
+}
+.midlo2 img,label{
+    cursor: pointer;
+}
+.colmn1{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+.colmn11{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+.colmn11 input[type="submit"]{
+    width: 180px;
+}
+.colmn11 input[type="number"],select{
+    width: 80px;
+    margin-right: 5px;
+}
+.row11{  
+    display: flex;
+    justify-content: start;
+}
+.row11 input[type="submit"]{
+    width: 100px;
+}
+.row1{  
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+.item1 {
+  width: 25%;
+  margin-left: 2px;
+}
+.item1 input[type="submit"]{
+    width: 200px;
+    margin-top: 5px;
+}
+.item2 {
+  width: 40%;
+}
+.row2{  
+    display: flex;
+    justify-content: start;
+    width: 100%;
+    margin-top: 5px;
+}
+.item3{
+    width: 10%;
+}
+.item4{
+    width: 30%;
+    margin-top: -5px;
+}
+.item4 button{
+    margin-left: 10px;
+}
+.colmn2{
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    width: 70%;
+}
+.colmn2 button{
+   width: 170px;
+}
+.row22{  
+    display: flex;
+    justify-content: start;
+    margin-bottom: 5px;
+}
+.row22 input, button, label{
+    margin-left: 5px;
+}
+.aboba{
+    overflow: hidden;
+    position: relative;
+    height: 485px;
+    text-align: center;
+}
+#canvasContainer {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.lab{
+    margin-left: 0px;
+    cursor: default;
+}
+.row3{  
+    display: flex;
+    justify-content: start;
+    margin-bottom: 5px;
+    width: 100%;
+}
+.row4{
+    display: flex;
+    justify-content: start;
+    margin-bottom: 10px;
+    margin-top: 5px;
+}
+.row4 input[type="text"]{
+    width: 80px;
+}
+.hidden-select{display: none;}
+.custom-select { /* Стилизуйте как хотите */ }
+.options { display: none; } /* Скрываем список опций */
+.custom-select.open .options{ display: block; }
+
+
+.scroll {
+    height: 400px;
+    width: 400px;  /* Высота блока */
+    overflow-y: scroll;  /* Включаем вертикальную прокрутку */
+    background-color: #ffffff; /* Светлый фон по умолчанию */
+    color: #000000; /* Черный текст по умолчанию */
+}
+
+body {
+    background-color: #ffffff; /* Светлый фон по умолчанию */
+    color: #000000; /* Черный текст по умолчанию */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Плавный переход */
+}
+
+.dark-mode {
+    background-color: #222222; /* Темный фон */
+    color: #ffffff; /* Светлый текст */
+}
+
+.inverted {
+    filter: invert(100%);
+}

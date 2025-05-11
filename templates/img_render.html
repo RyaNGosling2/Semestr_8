@@ -1,0 +1,274 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>XDD</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <table border="1px">
+        <thead>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="2">
+                    <form action="{{ url_for('abobik') }}" enctype="multipart/form-data" method="POST">
+                        <div class="row1">
+                            <div class="item1">
+                                <div class="colmn1">                               
+                                    <label for="img" id="darkik">Загрузка основного FITS файла</label>
+                                    <input id="darkik1" name="img" type="file" accept=".fits" />
+                                    <input type="submit" id="darkik2" name="solo" value="Открыть загруженный файл"/>
+                                    <input type="submit" id="darkik3" name="sli" value="Загрузить файл с кубом данных"/>
+                                    <input type="submit" id="darkik4" name="piki" value="Поиск локальных пиков"/>
+                                </div>
+                            </div>
+                            <div class="item2">
+                                <div class="colmn1">
+                                    <details>
+                                        <summary>Дополнительные файлы</summary>
+                                        <label>Тёмноё изображение -</label>
+                                        <input name="img1" type="file" accept=".fits" style="padding-left: 6.5px;" /><br>
+                                        <label>Плоское изображение -</label>
+                                        <input name="img2" type="file" accept=".fits" />
+                                    </details>
+                                    <details>
+                                        <summary>Дополнительные методы обработки</summary>
+                                        <div class="colmn11">
+                                            <input type="submit" name="kub" value="Обработка куба данных" style="margin-bottom: 5px;" />
+                                            <div class="row22">
+                                                <select name="osi">
+                                                    <option value="option1">NAXIS1</option>
+                                                    <option value="option2">NAXIS2</option>
+                                                    <option value="option3">NAXIS3</option>
+                                                  </select>
+                                                <input type="number" id="os" name="os" min="0" value="100">
+                                                <input type="submit" name="slicic" value="Взять срез"/>
+                                            </div>
+                                        </div>
+                                    </details>
+                                </div>
+                            </div>
+                            <div class="colmn1" style="margin-right: 2px; margin-top: 1px;">
+                                <button id="about-button" onclick="notform(event)" style="margin-bottom: 5px;">Пользовательское руководство</button>
+                                <button id="theme-toggle" onclick="notform(event)">Переключить тему</button>
+                            </div>
+                        </div>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td width="60%" td valign="top">
+                    <details style="margin-left: 2px;">
+                        <summary>Стандартные методы обработки</summary>
+                        <div>
+                            <button onclick="bwFilter()">Перевод изображения в чёрно-белое</button>
+                            <button onclick="resetImage()" style="margin-left: 5px">Сброс</button>
+                        </div>
+                        <div class="con">
+                            <div class="midlo">
+                                <label for="brightnessSlider">Яркость:</label>
+                                <input id="brightnessSlider"
+                                   type="range" value="100"
+                                   min="0" max="500" 
+                                   oninput="applyFilter()">
+                                <span id="brigthVal"></span>
+                            </div>
+                            <div class="midlo">
+                                <label for="contrastSlider">Контрастность:</label>
+                                <input id="contrastSlider"
+                                   type="range" value="100"
+                                   min="0" max="500" 
+                                   oninput="applyFilter()">
+                                <span id="conthVal"></span>
+                            </div>
+                        </div>
+                        <div class="con">
+                            <div class="midlo">
+                                <label for="grayscaleSlider">Градация серого:</label>
+                                <input id="grayscaleSlider" 
+                                   type="range" value="0"
+                                   min="0" max="100" 
+                                   oninput="applyFilter()">
+                                <span id="graythVal"></span>
+                            </div>
+                            <div class="midlo">
+                                <label for="saturationSlider">Насыщенность:</label>
+                                <input id="saturationSlider"
+                                   type="range" value="100"
+                                   min="0" max="500"
+                                   oninput="applyFilter()">
+                                <span id="saturthVal"></span>
+                            </div>
+                        </div>
+                        <div class="con">
+                            <div class="midlo">
+                                <label for="hueRotateSlider">Цветовая карта:</label>
+                                <input id="hueRotateSlider"
+                                    type="range" value="0"
+                                    min="0" max="360"
+                                    oninput="applyFilter()">
+                                <span id="huehVal"></span>
+                            </div>
+                            <div class="midlo">
+                                <label for="scale">Масштаб:</label>
+                                <input id="scale" 
+                                       type="range" value="100"
+                                       min="10" max="300" 
+                                       oninput="scaleCanvas()">
+                                <span id="scalhVal"></span>
+                            </div>
+                        </div>
+                        <div class="row2">
+                            <div class="item3">
+                                <div class="colmn1">
+                                    <label><b>Режимы:</b></label>
+                                </div>
+                            </div>
+                            <div class="item4">
+                                <div class="colmn1">
+                                    <div class="row2">
+                                        <input type="radio" id="option1" name="myGroup" value="option1" onchange="handleRadioChange(this)">
+                                        <label for="option1">Перемещение</label>
+                                    </div>
+                                    <div class="row2">
+                                        <div class="midlo">
+                                            <input type="radio" id="option2" name="myGroup" value="option2" onchange="handleRadioChange(this)">
+                                            <label for="option2">Обрезка</label>
+                                            <button id="cropButton">Обрезать</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                    <form action="{{ url_for('abobik') }}" enctype="multipart/form-data" method="POST" id="myForm">
+                        <details style="margin-top: 5px; margin-left: 2px;">
+                            <summary>Работа с FITS файлом</summary>
+                                <div class="colmn2">
+                                    <button type="submit" name="down" style="margin-bottom: 5px;">Выгрузить файл</button>
+                                    <div class="row22">
+                                        <label for="dpi">Введите DPI (от 50 до 1000):</label>
+                                        <input type="number" id="dpi" name="dpi" min="50" max="1000" value="100">
+                                        <button onclick="saveImage(event)" >Выгрузить изображение</button>
+                                    </div>
+                                    <button onclick="saveMeta(event)" >Выгрузить метаданные</button>
+                                </div>
+                            <textarea style="display:none;" id="canvasData" name="canvas_data"></textarea>
+                            <textarea style="display:none;" id="story" name="story" rows="30" cols="60">"{{hdu}}"</textarea>
+                        </details> 
+                    </form>                       
+                </td>
+                <td valign="top">
+                    <form action="{{ url_for('abobik') }}" enctype="multipart/form-data" method="POST">
+                        <details style="margin-left: 2px;">
+                            <summary>Обработка цветовой карты</summary>
+                            <div class="mar">
+                                <label class="lab"><b>Выбор готовой цветовой карты:</b></label>
+                                <div class="custom-select" style="margin-top: 5px;">
+                                    <div class="row22">
+                                        <div class="selected-option" style="cursor: pointer; ">Выберите опцию</div>
+                                        <button name="cmapsi" id="iii">Изменить цветовую карту</button>
+                                    </div>
+                                    <div class="options">
+                                        <div class="row3">
+                                            <div class="option" data-value="option1">
+                                                <div class="midlo2">
+                                                    <img src="{{ url_for('static', filename='img/gray.png') }}" height="25px" width="80px">
+                                                    <label style="margin-right: 20px;">Gray</label>
+                                                </div>
+                                            </div>
+                                            <div class="option" data-value="option2">
+                                                <div class="midlo2">
+                                                    <img src="{{ url_for('static', filename='img/cool.png') }}" height="25px" width="80px">
+                                                    <label style="margin-right: 20px;">Cool</label>
+                                                </div>
+                                            </div>
+                                            <div class="option" data-value="option3">
+                                                <div class="midlo2">
+                                                    <img src="{{ url_for('static', filename='img/hot.png') }}" height="25px" width="80px">
+                                                    <label>Hot</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row3">                                     
+                                            <div class="option" data-value="option4">
+                                                <div class="midlo2">
+                                                    <img src="{{ url_for('static', filename='img/viridis.png') }}" height="25px" width="80px">
+                                                    <label style="margin-right: 8px;">Viridis</label>
+                                                </div>
+                                            </div>
+                                            <div class="option" data-value="option5">
+                                                <div class="midlo2">
+                                                    <img src="{{ url_for('static', filename='img/magma.png') }}" height="25px" width="80px">
+                                                    <label style="margin-right: 3px;">Magma</label>
+                                                </div>
+                                            </div>
+                                            <div class="option" data-value="option6">
+                                                <div class="midlo2">
+                                                    <img src="{{ url_for('static', filename='img/cividis.png') }}" height="25px" width="80px">
+                                                    <label>Cividis</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <select class="hidden-select" style="display: none;" name="cm_selector">
+                                        <option value="option1" selected>Option 1</option>
+                                        <option value="option2">Option 2</option>
+                                        <option value="option3">Option 2</option>
+                                        <option value="option4">Option 2</option>
+                                        <option value="option5">Option 2</option>
+                                        <option value="option6">Option 2</option>
+                                    </select>
+                                </div>                           
+                                <label class="lab"><b>Изменение границ цветовой карты:</b></label>
+                                <div class="row4">
+                                    <label style="margin-left:0px;">Min:</label>
+                                    <input type="text" id="numberInputmin" min="0" max="215" name="min">
+                                    <label>Max:</label>
+                                    <input type="text" id="numberInputmax" min="10" max="225" name="max">
+                                    <button type="submit" name="vmin_vmax">Изменить диапазон отображения</button>
+                                </div>
+
+                                <label class="lab"><b>Применение нормализации:</b></label>
+                                <div class="row22" style="margin-top:5px">
+                                    <select name="norm_selector">
+                                        <option value="option1">Linear</option>
+                                        <option value="option2">LogNorm</option>
+                                        <option value="option3">AsinhNorm</option>
+                                        <option value="option4">PowerNorm</option>
+                                        <option value="option5">SymLogNorm</option>
+                                      </select>
+                                    <button name="normaliki" id="iii">Применить нормализацию</button>
+                                </div>
+                            </div>
+                        </details>
+                    </form>
+                </td>
+            </tr>
+            <tr>
+                <td class="aboba" id="tdshka">
+                    <img src="{{img}}" id="sourceImage" crossorigin="anonymous">
+                    <div id="canvasContainer">           
+                        <canvas id="canvas" height="0" class="convik"></canvas>
+                    </div>
+                    <a id="link"></a>
+                </td>
+                <td valign="top">
+                    <details style="margin-left: 2px;">
+                        <summary>Мета данные</summary>
+                        <textarea id="story" name="story" rows="30" cols="60">"{{hdu}}"</textarea>
+                    </details>
+                </td>    
+            </tr>
+        </tbody>
+    </table>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% if message %}
+        <script>
+            alert("{{ message }}");
+        </script>
+    {% endif %}
+</body>
+</html>
