@@ -432,6 +432,6 @@ def kubi(file,opend_image):
     plt.rcParams.update({'font.size': 11})
     plt.savefig(opend_image, bbox_inches='tight', pad_inches=0, dpi=300)
     return
- 
+  
 if __name__ == '__main__':
-    app.run(debug=True, port=8001)
+    app.run(debug=True, port=8001, host='0.0.0.0')
