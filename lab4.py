@@ -22,7 +22,7 @@ import base64
 import io
 from matplotlib import cm
 import time
-
+ 
 app = Flask(__name__)
 upload_folder = os.path.join('static', 'uploads')
 app.config['UPLOAD'] = upload_folder
@@ -33,7 +33,7 @@ colmap = cm.gray
 opend_data = []
 @app.route('/', methods=['GET', 'POST'])
 def abobik():
-    start_time = time.time()
+    #start_time = time.time()
     global opend_image
     global opend_file
     global opend_hdu
@@ -47,16 +47,22 @@ def abobik():
         opend_file = os.path.join(app.config['UPLOAD'], filename)
         opend_image = os.path.join(app.config['UPLOAD'], "image.png")
         file.save(opend_file)        
-        header, data = load_fits(opend_file)
-        opend_hdu = header
-        plt.imshow(data, cmap='gray',norm=LogNorm())
+        opend_hdu, data = load_fits(opend_file)
+        if data is None:
+            opend_hdu, data = load_fits(opend_file,1)
+        if data.ndim == 3:
+            plt.imshow(data[0, :, :], cmap='gray')
+        else:
+            plt.imshow(data, cmap='gray', norm=LogNorm())
         colmap = cm.gray
         plt.axis('off')
         plt.savefig(opend_image, bbox_inches='tight', pad_inches=0, dpi=300)
-        end_time = time.time()
-        elapsed_time = end_time - start_time
-        return render_template('img_render.html', img=opend_image, hdu=opend_hdu, message=f"Время выполнения: {elapsed_time:.4f} секунд")
-      
+        plt.close()
+        #end_time = time.time()
+        #elapsed_time = end_time - start_time
+        #return render_template('img_render.html', img=opend_image, hdu=opend_hdu, message=f"Время выполнения: {elapsed_time:.4f} секунд")
+        return render_template('img_render.html', img=opend_image, hdu=opend_hdu)
+        
     elif 'sli' in request.form:
         file = request.files['img']
         if file.filename == '':
@@ -65,6 +71,8 @@ def abobik():
         opend_file = os.path.join(app.config['UPLOAD'], filename)
         file.save(opend_file)        
         with fits.open(opend_file) as hdul:
+            if hdul[0].data.ndim != 3:
+                return render_template('img_render.html', message='Файл не содержит куб данных')
             opend_data = hdul[0].data
             opend_hdu = hdul[0].header
         return render_template('img_render.html', hdu=opend_hdu, message='Файл загружен, проверьте метаданные и выберите ось и место для взятия среза')  
@@ -113,11 +121,12 @@ def abobik():
             ax.plot(peaks[:, 1], peaks[:, 0], 'o', color='None', mec='r', ms=10, alpha=0.8)
             plt.axis('off')
             plt.savefig(opend_image, bbox_inches='tight', pad_inches=0, dpi=300)
-            end_time = time.time()
-            elapsed_time = end_time - start_time
+            #end_time = time.time()
+            #elapsed_time = end_time - start_time
+            #return render_template('img_render.html', img=opend_image, hdu=opend_hdu,
+                                   #message=f'Дополнительные FITS файлы (dark.fits и/или flat.fits) отсутствуют, качество снижено,Время выполнения: {elapsed_time:.4f} секунд')
             return render_template('img_render.html', img=opend_image, hdu=opend_hdu,
-                                   message=f'Дополнительные FITS файлы (dark.fits и/или flat.fits) отсутствуют, качество снижено,Время выполнения: {elapsed_time:.4f} секунд')
-    
+                                   message='Дополнительные FITS файлы (dark.fits и/или flat.fits) отсутствуют, качество снижено')
     elif 'kub' in request.form:
         file = request.files['img']
         if file.filename == '':
@@ -125,18 +134,12 @@ def abobik():
         filename = secure_filename(file.filename)
         opend_file = os.path.join(app.config['UPLOAD'], filename)
         opend_image = os.path.join(app.config['UPLOAD'], "image.png")
-        file.save(opend_file)
+        file.save(filename)
         with fits.open(opend_file) as hdul:
             opend_hdu = hdul[0].header
-            if hdul[0].data.ndim == 3:
+            if hdul[0].data.ndim != 3:
                 return render_template('img_render.html', message='Файл не содержит куб данных')
-        im_hi, x_lim, y_lim = kubi(opend_file)       
-        cbar_hi = plt.colorbar(im_hi, orientation = 'horizontal', fraction=0.046, pad=0.07)
-        cbar_hi.set_label('HI 'r'$21$cm Mean Velocity (km/s)', size = 20)
-        ax.set_xlim(x_lim)
-        ax.set_ylim(y_lim)
-        plt.rcParams.update({'font.size': 11})
-        plt.savefig(opend_image, bbox_inches='tight', pad_inches=0, dpi=300)
+        kubi(opend_file,opend_image)
         return render_template('img_render.html', img=opend_image, hdu=opend_hdu)
     
     elif 'down' in request.form:
@@ -148,7 +151,7 @@ def abobik():
             file_path,
             as_attachment=True,
             download_name='xdd.fits'
-        )
+        ) 
     elif 'cmapsi' in request.form:
         selected_value = request.form.get('cm_selector')
         if selected_value == 'option1':
@@ -187,9 +190,9 @@ def abobik():
         img_array = np.array(img)
         plt.imshow(img_array, cmap=colmap, norm=norm)
         plt.axis('off')
-        plt.savefig(os.path.join(app.config['UPLOAD'], "image_norm.png"), bbox_inches='tight', pad_inches=0, dpi=300)
+        plt.savefig(opend_image, bbox_inches='tight', pad_inches=0, dpi=300)
         plt.close()
-        return render_template('img_render.html', img=os.path.join(app.config['UPLOAD'], "image_norm.png"), hdu=opend_hdu)
+        return render_template('img_render.html', img=opend_image, hdu=opend_hdu)
     
     elif 'vmin_vmax' in request.form:
         vmin = request.form['min']
@@ -198,13 +201,13 @@ def abobik():
         img_array = np.array(img)
         plt.imshow(img_array, cmap=colmap, vmin=vmin, vmax=vmax)
         plt.axis('off')
-        plt.savefig(os.path.join(app.config['UPLOAD'], "image1.png"), bbox_inches='tight', pad_inches=0, dpi=300)
+        plt.savefig(opend_image, bbox_inches='tight', pad_inches=0, dpi=300)
         plt.close()
-        return render_template('img_render.html', img=os.path.join(app.config['UPLOAD'], "image1.png"), hdu=opend_hdu)
+        return render_template('img_render.html', img=opend_image, hdu=opend_hdu)
  
     else:
         return render_template('img_render.html',img=opend_image, hdu=opend_hdu)
- 
+
 #ФУнкция сохранени в fits
 def png_to_fits(png_filepath, txt_filepath):
   try:
@@ -377,7 +380,7 @@ def piki(file,file_d,file_f):
     return  pipe, peaks
 
 #Функция для работы с кубами
-def kubi(file):
+def kubi(file,opend_image):
     hi_data = fits.open(file)
     cube = SpectralCube.read(hi_data)  
     hi_data.close() 
@@ -389,14 +392,11 @@ def kubi(file):
     moment_1 = sub_cube_slab.with_spectral_unit(u.km/u.s).moment(order=1)
     hi_column_density = moment_0 * 1.82 * 10**18 / (u.cm * u.cm) * u.s / u.K / u.km
     result = ESASky.query_region_maps('SMC', radius=1*u.deg, missions='Herschel')
-    #result['HERSCHEL'].keys()
-    #result['HERSCHEL']['filter']
     filters = result['HERSCHEL']['filter'].astype(str)
     mask = np.array(['250, 350, 500' == s for s in filters], dtype='bool')
     target_obs = TableList({"HERSCHEL":result['HERSCHEL'][mask]})
     IR_images = ESASky.get_maps(target_obs)
     herschel_header = IR_images['HERSCHEL'][0]['350']['image'].header
-    #herschel_wcs = WCS(IR_images['HERSCHEL'][0]['350']['image'])
     herschel_imagehdu = IR_images['HERSCHEL'][0]['350']['image'] 
     himage_nan_locs = np.isnan(herschel_imagehdu.data)
     herschel_data_nonans = herschel_imagehdu.data
@@ -425,7 +425,13 @@ def kubi(file):
     levels = (2e21, 3e21, 5e21, 7e21, 8e21, 1e22)
     ax.contour(hi_column_density.hdu.data, cmap = 'Greys_r', alpha = 0.8, levels = levels,transform = hi_transform)
     im_hi = ax.imshow(moment_1.hdu.data, cmap = 'RdBu_r', vmin = 0, vmax = 200, alpha = 0.5, transform = hi_transform)
-    return im_hi, x_lim, y_lim 
-
+    cbar_hi = plt.colorbar(im_hi, orientation = 'horizontal', fraction=0.046, pad=0.07)
+    cbar_hi.set_label('HI 'r'$21$cm Mean Velocity (km/s)', size = 20)
+    ax.set_xlim(x_lim)
+    ax.set_ylim(y_lim)
+    plt.rcParams.update({'font.size': 11})
+    plt.savefig(opend_image, bbox_inches='tight', pad_inches=0, dpi=300)
+    return
+ 
 if __name__ == '__main__':
     app.run(debug=True, port=8001)

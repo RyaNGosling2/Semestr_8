@@ -34,7 +34,7 @@ function applyFilter() {
         ") saturate(" + saturateSlider.value + "%" +
         ") hue-rotate(" + hueRotateSlider.value + "deg" + ")";
     context.filter = filterString;
-    context.drawImage(image, 0, 0,canvas.width, canvas.height);
+    context.drawImage(currentImage, 0, 0,canvas.width, canvas.height);
     document.getElementById('brigthVal').textContent = brightnessSlider.value + "%";
     document.getElementById('conthVal').textContent = contrastSlider.value + "%";
     document.getElementById('graythVal').textContent = grayscaleSlider.value + "%";
@@ -229,46 +229,41 @@ function handleRadioChange(radioButton) {
 
 
 const cropButton = document.getElementById('cropButton');
-        cropButton.addEventListener('click', () => {
-            const originalWidth = canvas.width;
-            const originalHeight = canvas.height;
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = selection.width;
-            tempCanvas.height = selection.height;
-            const tempCtx = tempCanvas.getContext('2d');
-            tempCtx.drawImage(
-                canvas,
-                selection.x + 1,
-                selection.y + 1,
-                selection.width - 2,
-                selection.height - 2,
-                0,
-                0,
-                selection.width,
-                selection.height
-            );
-            canvas.width = selection.width;
-            canvas.height = selection.height;
-            context.clearRect(0, 0, canvas.width, canvas.height);
-             context.drawImage(
-                tempCanvas,
-                0,
-                0,
-                selection.width,
-                selection.height,
-                0,
-                0,
-                selection.width,
-                selection.height
-            );
-             currentImage = new Image();
+cropButton.addEventListener('click', () => {
+    const originalWidth = canvas.width;
+    const originalHeight = canvas.height;
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = selection.width;
+    tempCanvas.height = selection.height;
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.drawImage(
+        canvas,
+        selection.x + 1,
+        selection.y + 1,
+        selection.width - 2,
+        selection.height - 2,
+        0,0,
+        selection.width,
+        selection.height);
+    canvas.width = selection.width;
+    canvas.height = selection.height;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(
+        tempCanvas,
+        0,0,
+        selection.width,
+        selection.height,
+        0,0,
+        selection.width,
+        selection.height);
+    currentImage = new Image();
     currentImage.src = canvas.toDataURL();
     currentImage.onload = () => {
-      drawImageOnCanvas();
+        drawImageOnCanvas();
     };
     currentWidth = canvas.width;
     currentHeight = canvas.height;
-        });
+});
 
 
 function drawImageOnCanvas() {
@@ -278,9 +273,9 @@ function drawImageOnCanvas() {
 
 
 function scaleCanvas() {
-    canvas.width = width * (scale.value / 100);
-    canvas.height = height * (scale.value / 100);
-    drawImageOnCanvas()
+    canvas.width = currentWidth * (scale.value / 100);
+    canvas.height = currentHeight * (scale.value / 100);
+    applyFilter();
     canvasContainer.style.left = td.offsetWidth/2 - canvas.offsetWidth/2  + 'px';
     canvasContainer.style.top = td.offsetHeight/2 - canvas.offsetHeight/2 + 'px';
     document.getElementById('scalhVal').textContent = scale.value + "%";
@@ -309,16 +304,14 @@ options.forEach(option => {
 
 
 
-  document.getElementById('about-button').addEventListener('click', function() {
-  // Создаем модальное окно или отображаем div с информацией
-  showAboutInfo();
+document.getElementById('about-button').addEventListener('click', function() {
+    showAboutInfo();
 });
 
 let aboutDiv = document.createElement('div');
 function showAboutInfo() {
-  // Создаем div элемент для отображения информации
   aboutDiv.id = 'about-modal';
-  aboutDiv.classList.add('scroll') // Для стилизации и управления
+  aboutDiv.classList.add('scroll')
   aboutDiv.style.cssText = `
     position: fixed;
     top: 50%;
@@ -330,8 +323,6 @@ function showAboutInfo() {
     z-index: 1000; /* Чтобы окно было поверх всего */
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
   `;
-
-  // Создаем контент для aboutDiv
   let content = `
     <h2>Пользовательское руководство</h2>
     <p>Версия: 1.0.0</p>
@@ -341,7 +332,7 @@ function showAboutInfo() {
     <h3>Функциональные возможности</h3>
     <ul>
         <li><strong>Поле "Загрузка основного FITS файла":</strong> поле для зрагрузки FITS файла.</li>
-        <li><strong>Кнопка "Открыть загруженный файл":</strong> отображает данные data (изображение) и metadata (данные описывающие изображение) в соответсвующих полях на странице. Обрабатываются только данные из нулевой ячейки файла.</li>
+        <li><strong>Кнопка "Открыть загруженный файл":</strong> отображает данные data (изображение) и metadata (данные описывающие изображение) в соответсвующих полях на странице. По умолчанию обрабатываются данные из нулевой ячейки файла. Если файл содержит трёхмерные данные, то одно измерение отбрамывается и отображаются только два. Если в нулевой ячейке файла не содержится изображение, то будут отображаться данные первой ячейки файла.</li>
         <li><strong>Кнопка "Загрузить файл с кубом данных":</strong> загружает файл с кубом данных из поля "Загрузка основного FITS файла". Используется для просмотра матаданных файла, а именно размерности куба данных.</li>
         <li><strong>Кнопка "Поиск локальных пиков":</strong> функция для поиска локальных пиков на изображении. Если помимо основного файла загружены 2 дополнительных (dark.fits и flat.fits), то перед поиском локальных пиков проводится улучшение исходного изображения (при этом точность поиска снижается). Результатом работы функции является изображение, хранящееся в исходном файле, с выделенными красными областями найденными локальными пиками.</li>
         <li><strong>Выпадающий список "Дополнительные файлы":</strong> имеет 2 поля для загрузки FITS файлов, которые используются для предобработки в процессе функции поиска локальных пиков.</li>
@@ -390,19 +381,13 @@ function showAboutInfo() {
 
     <p>Обратная связь: <a href="prib-211_582519@volsu.ru">prib-211_582519@volsu.ru</a></p>
   `;
-
   aboutDiv.innerHTML = content;
-
-  // Создаем кнопку закрытия
   let closeButton = document.createElement('button');
   closeButton.innerText = 'Закрыть';
   closeButton.addEventListener('click', function() {
     document.body.removeChild(aboutDiv);
   });
-
   aboutDiv.appendChild(closeButton);
-
-  // Добавляем div на страницу
   document.body.appendChild(aboutDiv);
 }
 
